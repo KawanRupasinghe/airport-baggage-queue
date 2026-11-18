@@ -15,3 +15,15 @@ def test_zero_wait_with_separated_arrivals():
 
 def test_reproducible():
     assert random_trace(.5,1,20,7)==random_trace(.5,1,20,7)
+
+
+def test_simultaneous_arrival_fifo():
+    r=simulate([0,0,0],[2,1,1],servers=2)
+    assert r.waits == [0,0,1]
+    assert r.completed==r.arrivals==3
+
+def test_queue_area_and_busy_area_hand_calculation():
+    r=simulate([0,1],[3,1],servers=1)
+    assert abs(r.mean_queue_length-2/4)<1e-12
+    assert abs(r.utilisation-1.0)<1e-12
+    assert abs(r.mean_wait-1.0)<1e-12
