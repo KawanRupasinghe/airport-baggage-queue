@@ -6,16 +6,17 @@
 </head>
 <body>
 <main>
-<header><p class="eyebrow">Interactive queue simulation · Research prototype</p><h1>Airport Queue Explorer</h1><p>Explore how staffing affects waiting in a <strong>synthetic</strong> secondary baggage-inspection queue. Arrivals and service times are not yet calibrated to airport observations.</p></header>
+<header><p class="eyebrow">Interactive queue simulation · Research prototype</p><h1>Airport Queue Explorer</h1><p>Explore staffing scenarios for one secondary baggage-inspection queue. <strong>Inspection durations are sampled from published airport observations</strong>; passenger arrivals remain explicitly assumed Poisson scenarios.</p></header>
 <section class="controls" aria-label="Simulation settings">
 <label>Arrival rate <small>passengers/min</small><input id="arrival" type="number" min="0.05" max="10" step="0.05" value="0.8"></label>
-<label>Mean service time <small>minutes</small><input id="service" type="number" min="0.05" max="10" step="0.05" value="1"></label>
+<label>Service-time multiplier <small>1 = observed durations; baseline mean = 1 min</small><input id="service" type="number" min="0.05" max="10" step="0.05" value="1"></label>
+<label>Service-time model<select id="distribution"><option value="empirical">Observed durations</option><option value="exponential">Exponential baseline</option></select></label>
 <label>Inspection stations<input id="servers" type="number" min="1" max="12" step="1" value="2"></label>
 <label>Playback speed<input id="speed" type="range" min="1" max="30" step="1" value="8"><output id="speedValue">8×</output></label>
 </section>
 <div class="actions"><button id="start">Start</button><button id="pause" class="secondary" disabled>Pause</button><button id="reset" class="secondary">Reset</button><button id="reference" class="outline">Run reference trace</button></div>
 <p id="error" role="alert" class="error" hidden></p>
-<div class="status"><span id="mode">Synthetic simulation</span><strong id="clock">00:00</strong><span id="progress">0 of 60 simulated minutes</span></div>
+<div class="status"><span id="mode">Observed service-time samples</span><strong id="clock">00:00</strong><span id="progress">0 of 60 simulated minutes</span></div>
 <section class="visual" aria-label="Live queue and inspection stations">
 <h2>Waiting queue <span id="queueCount">0 waiting</span></h2>
 <div id="waiting" class="waiting" aria-live="off"><span class="muted">Press Start to simulate passenger arrivals</span></div>
@@ -28,7 +29,8 @@
 <div><small>Mean queue length</small><strong id="meanQueue">—</strong></div>
 <div><small>Station utilisation</small><strong id="util">—</strong></div>
 </section>
-<details><summary>About · How to use · Verification</summary><p>Choose the arrival rate, mean screening duration and number of identical stations. Press <strong>Start</strong> to run a single FIFO queue with exponential interarrival and service times. Pause or reset at any time. The simulation admits arrivals for 60 minutes, then drains the queue before reporting final statistics. Repeated runs are needed for confidence intervals; this single animation is not a statistical conclusion.</p><p><strong>Reference trace:</strong> the deterministic test has arrivals at 0, 1 and 1.5 minutes, service times 3, 2 and 1 minute, and one station. Expected waits are 0, 2 and 3.5 minutes, with mean 1.8333 minutes. This test is shared with the Python unit tests.</p><p><strong>Limitations:</strong> all inputs currently represent synthetic scenarios. Actual inspection durations will be incorporated after dataset cleaning and source checks. This is a queueing demonstration, not an operational safety recommendation.</p></details>
+<details><summary>About · How to use · Verification</summary><p>Choose the arrival rate, service-duration multiplier, number of identical stations, and empirical/exponential service model. Press <strong>Start</strong> to run a single FIFO queue with exponential interarrival times. Empirical mode samples observed baggage-check durations (n=162) with replacement. In baseline mode services are exponential with a 1-minute mean before scaling. Pause or reset at any time. The simulation admits arrivals for 60 minutes, then drains the queue before reporting final statistics. Repeated runs are needed for confidence intervals; this single animation is not a statistical conclusion.</p><p><strong>Reference trace:</strong> the deterministic test has arrivals at 0, 1 and 1.5 minutes, service times 3, 2 and 1 minute, and one station. Expected waits are 0, 2 and 3.5 minutes, with mean 1.8333 minutes. This test is shared with the Python unit tests.</p><p><strong>Limitations:</strong> arrival rates and pooled multi-station configuration are assumed rather than directly observed. The real data describe only selected manual baggage checks and may not represent all secondary checks. The animation is one run; notebook confidence intervals, not this animation, support scenario decisions. This is a queueing demonstration, not an operational safety recommendation.</p></details>
+<p class="source-note"><strong>Source:</strong> Rotterdam The Hague Airport Security Checkpoint Data (4TU.ResearchData; CC BY 4.0). Only screening durations are used; see <a href="https://research.tudelft.nl/en/datasets/airport-security-checkpoint-data/">dataset record</a> for provenance.</p>
 <footer>All calculations run locally in your browser. No passenger data is transmitted.</footer>
-</main><script src="script.js"></script>
+</main><script src="observed_durations.js"></script><script src="script.js"></script>
 </body></html>
