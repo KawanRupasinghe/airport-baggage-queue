@@ -27,3 +27,11 @@ def test_queue_area_and_busy_area_hand_calculation():
     assert abs(r.mean_queue_length-2/4)<1e-12
     assert abs(r.utilisation-1.0)<1e-12
     assert abs(r.mean_wait-1.0)<1e-12
+
+def test_zero_origin_time_averages():
+    # First passenger arrives at minute 5. Queue waits 2 minutes total;
+    # final departure occurs at minute 11, so denominator is 11 (not 6).
+    r = simulate([5, 6, 6.5], [3, 2, 1], servers=1)
+    assert abs(r.mean_wait - (0 + 2 + 3.5) / 3) < 1e-12
+    assert abs(r.mean_queue_length - 5.5 / 11) < 1e-12
+    assert abs(r.utilisation - 6 / 11) < 1e-12

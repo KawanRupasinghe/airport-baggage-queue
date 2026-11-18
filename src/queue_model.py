@@ -30,7 +30,6 @@ def simulate(arrivals, services, servers=2, target_wait=5.0):
     queue=deque()
     waits=[0.0]*n
     i=0; done=0; now=0.; queue_area=0.; busy_area=0.
-    horizon_start=arrivals[0]
     while done<n:
         next_arrival=arrivals[i] if i<n else inf
         next_depart=min(finish)
@@ -50,7 +49,7 @@ def simulate(arrivals, services, servers=2, target_wait=5.0):
             customer=queue.popleft()
             waits[customer]=now-arrivals[customer]
             finish[j]=now+services[customer]
-    duration=now-horizon_start
+    duration=now  # Time-averaged metrics over [0, final departure], matching browser.
     return Result(n,done,sum(waits)/n,sum(w>target_wait for w in waits)/n,
                   queue_area/duration if duration else 0,
                   busy_area/(servers*duration) if duration else 0,waits)
