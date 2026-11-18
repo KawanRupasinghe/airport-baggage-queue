@@ -1,1 +1,34 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Airport Queue Explorer</title><link rel="stylesheet" href="style.css"></head><body><main><h1>Airport Queue Explorer</h1><p>Explore a <strong>synthetic M/M/c steady-state baseline</strong>. This is not calibrated to real airport arrivals.</p><section><label>Arrival rate (passengers/min) <input id="arrival" type="number" min="0.01" max="20" step="0.1" value="0.8"></label><label>Mean service time (min) <input id="service" type="number" min="0.01" max="60" step="0.1" value="1"></label><label>Stations <input id="servers" type="number" min="1" max="30" step="1" value="2"></label><button id="run">Calculate</button></section><div id="result" role="status" aria-live="polite"></div><p class="note">Analytical Erlang-C calculations assume Poisson arrivals, exponential independent service times, a shared FIFO queue and steady-state stability. No passenger data is uploaded or transmitted.</p></main><script src="script.js"></script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Airport Queue Explorer</title><link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main>
+<header><p class="eyebrow">Interactive queue simulation · Research prototype</p><h1>Airport Queue Explorer</h1><p>Explore how staffing affects waiting in a <strong>synthetic</strong> secondary baggage-inspection queue. Arrivals and service times are not yet calibrated to airport observations.</p></header>
+<section class="controls" aria-label="Simulation settings">
+<label>Arrival rate <small>passengers/min</small><input id="arrival" type="number" min="0.05" max="10" step="0.05" value="0.8"></label>
+<label>Mean service time <small>minutes</small><input id="service" type="number" min="0.05" max="10" step="0.05" value="1"></label>
+<label>Inspection stations<input id="servers" type="number" min="1" max="12" step="1" value="2"></label>
+<label>Playback speed<input id="speed" type="range" min="1" max="30" step="1" value="8"><output id="speedValue">8×</output></label>
+</section>
+<div class="actions"><button id="start">Start</button><button id="pause" class="secondary" disabled>Pause</button><button id="reset" class="secondary">Reset</button><button id="reference" class="outline">Run reference trace</button></div>
+<p id="error" role="alert" class="error" hidden></p>
+<div class="status"><span id="mode">Synthetic simulation</span><strong id="clock">00:00</strong><span id="progress">0 of 60 simulated minutes</span></div>
+<section class="visual" aria-label="Live queue and inspection stations">
+<h2>Waiting queue <span id="queueCount">0 waiting</span></h2>
+<div id="waiting" class="waiting" aria-live="off"><span class="muted">Press Start to simulate passenger arrivals</span></div>
+<h2>Inspection stations</h2><div id="stations" class="stations"></div>
+</section>
+<section class="metrics" aria-label="Live simulation statistics">
+<div><small>Passengers arrived</small><strong id="arrived">0</strong></div>
+<div><small>Passengers completed</small><strong id="completed">0</strong></div>
+<div><small>Mean queue wait</small><strong id="meanWait">—</strong></div>
+<div><small>Mean queue length</small><strong id="meanQueue">—</strong></div>
+<div><small>Station utilisation</small><strong id="util">—</strong></div>
+</section>
+<details><summary>About · How to use · Verification</summary><p>Choose the arrival rate, mean screening duration and number of identical stations. Press <strong>Start</strong> to run a single FIFO queue with exponential interarrival and service times. Pause or reset at any time. The simulation admits arrivals for 60 minutes, then drains the queue before reporting final statistics. Repeated runs are needed for confidence intervals; this single animation is not a statistical conclusion.</p><p><strong>Reference trace:</strong> the deterministic test has arrivals at 0, 1 and 1.5 minutes, service times 3, 2 and 1 minute, and one station. Expected waits are 0, 2 and 3.5 minutes, with mean 1.8333 minutes. This test is shared with the Python unit tests.</p><p><strong>Limitations:</strong> all inputs currently represent synthetic scenarios. Actual inspection durations will be incorporated after dataset cleaning and source checks. This is a queueing demonstration, not an operational safety recommendation.</p></details>
+<footer>All calculations run locally in your browser. No passenger data is transmitted.</footer>
+</main><script src="script.js"></script>
+</body></html>
