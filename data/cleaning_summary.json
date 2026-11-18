@@ -1,0 +1,146 @@
+{
+  "primary_valid_n": 162,
+  "secondary_unlisted_valid_n": 6,
+  "mean_seconds": 59.96913580246913,
+  "median_seconds": 42.0,
+  "minimum_seconds": 3,
+  "maximum_seconds": 276,
+  "workbook_sha256": "ab3cccb15b8487fbad67d1883e853891754bacc5a53a39feb4864dcb5c6ae9af",
+  "audit": [
+    {
+      "sheet": "2018_02_23",
+      "both_missing": 553,
+      "invalid_or_unpaired": 1,
+      "non_positive": 0,
+      "over_30min": 0,
+      "retained": 23,
+      "in_readme_session_table": true
+    },
+    {
+      "sheet": "2018_03_01",
+      "both_missing": 139,
+      "invalid_or_unpaired": 0,
+      "non_positive": 0,
+      "over_30min": 0,
+      "retained": 12,
+      "in_readme_session_table": true
+    },
+    {
+      "sheet": "2018_03_10",
+      "both_missing": 1362,
+      "invalid_or_unpaired": 0,
+      "non_positive": 0,
+      "over_30min": 0,
+      "retained": 11,
+      "in_readme_session_table": true
+    },
+    {
+      "sheet": "2018_03_12",
+      "both_missing": 1357,
+      "invalid_or_unpaired": 0,
+      "non_positive": 0,
+      "over_30min": 0,
+      "retained": 16,
+      "in_readme_session_table": true
+    },
+    {
+      "sheet": "2018_03_31",
+      "both_missing": 601,
+      "invalid_or_unpaired": 0,
+      "non_positive": 0,
+      "over_30min": 0,
+      "retained": 8,
+      "in_readme_session_table": true
+    },
+    {
+      "sheet": "2018_04_07",
+      "both_missing": 482,
+      "invalid_or_unpaired": 1,
+      "non_positive": 0,
+      "over_30min": 0,
+      "retained": 11,
+      "in_readme_session_table": true
+    },
+    {
+      "sheet": "2018_04_15",
+      "both_missing": 345,
+      "invalid_or_unpaired": 0,
+      "non_positive": 0,
+      "over_30min": 0,
+      "retained": 11,
+      "in_readme_session_table": true
+    },
+    {
+      "sheet": "2018_04_17a",
+      "both_missing": 136,
+      "invalid_or_unpaired": 0,
+      "non_positive": 0,
+      "over_30min": 0,
+      "retained": 7,
+      "in_readme_session_table": true
+    },
+    {
+      "sheet": "2018_04_17b",
+      "both_missing": 39,
+      "invalid_or_unpaired": 0,
+      "non_positive": 0,
+      "over_30min": 0,
+      "retained": 2,
+      "in_readme_session_table": true
+    },
+    {
+      "sheet": "2018_12_06a",
+      "both_missing": 488,
+      "invalid_or_unpaired": 0,
+      "non_positive": 0,
+      "over_30min": 0,
+      "retained": 0,
+      "in_readme_session_table": false
+    },
+    {
+      "sheet": "2018_12_06b",
+      "both_missing": 490,
+      "invalid_or_unpaired": 0,
+      "non_positive": 0,
+      "over_30min": 0,
+      "retained": 0,
+      "in_readme_session_table": false
+    },
+    {
+      "sheet": "2018_12_17a",
+      "both_missing": 480,
+      "invalid_or_unpaired": 1,
+      "non_positive": 0,
+      "over_30min": 0,
+      "retained": 11,
+      "in_readme_session_table": true
+    },
+    {
+      "sheet": "2018_12_17b",
+      "both_missing": 1360,
+      "invalid_or_unpaired": 2,
+      "non_positive": 0,
+      "over_30min": 0,
+      "retained": 11,
+      "in_readme_session_table": true
+    },
+    {
+      "sheet": "2018_12_18a",
+      "both_missing": 303,
+      "invalid_or_unpaired": 1,
+      "non_positive": 0,
+      "over_30min": 0,
+      "retained": 17,
+      "in_readme_session_table": true
+    },
+    {
+      "sheet": "2018_12_18b",
+      "both_missing": 299,
+      "invalid_or_unpaired": 0,
+      "non_positive": 0,
+      "over_30min": 0,
+      "retained": 22,
+      "in_readme_session_table": true
+    }
+  ]
+}
