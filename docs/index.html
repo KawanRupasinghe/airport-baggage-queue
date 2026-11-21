@@ -1,36 +1,173 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Airport Queue Explorer</title><link rel="stylesheet" href="style.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#10223b">
+  <meta name="description" content="Data-informed discrete-event simulation for a hypothetical shared airport baggage-inspection queue.">
+  <title>Airport Queue Explorer | Simulation Studio</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<main>
-<header><p class="eyebrow">Interactive queue simulation · Research prototype</p><h1>Airport Queue Explorer</h1><p>Explore staffing scenarios for one secondary baggage-inspection queue. <strong>Inspection durations are sampled from published airport observations</strong>; passenger arrivals remain explicitly assumed Poisson scenarios.</p></header>
-<section class="controls" aria-label="Simulation settings">
-<label>Arrival rate <small>passengers/min</small><input id="arrival" type="number" min="0.05" max="10" step="0.05" value="0.8"></label>
-<label>Service-time multiplier <small>1 = observed durations; baseline mean = 1 min</small><input id="service" type="number" min="0.05" max="10" step="0.05" value="1"></label>
-<label>Service-time model<select id="distribution"><option value="empirical">Observed durations</option><option value="exponential">Exponential baseline</option></select></label>
-<label>Inspection stations<input id="servers" type="number" min="1" max="12" step="1" value="2"></label>
-<label>Playback speed<input id="speed" type="range" min="1" max="30" step="1" value="8"><output id="speedValue">8×</output></label>
-</section>
-<div class="actions"><button id="start">Start</button><button id="pause" class="secondary" disabled>Pause</button><button id="reset" class="secondary">Reset</button><button id="reference" class="outline">Run reference trace</button></div>
-<p id="error" role="alert" class="error" hidden></p>
-<div class="status"><span id="mode">Observed service-time samples</span><strong id="clock">00:00</strong><span id="progress">0 of 60 simulated minutes</span></div>
-<section class="visual" aria-label="Live queue and inspection stations">
-<h2>Waiting queue <span id="queueCount">0 waiting</span></h2>
-<div id="waiting" class="waiting" aria-live="off"><span class="muted">Press Start to simulate passenger arrivals</span></div>
-<h2>Inspection stations</h2><div id="stations" class="stations"></div>
-</section>
-<section class="metrics" aria-label="Live simulation statistics">
-<div><small>Passengers arrived</small><strong id="arrived">0</strong></div>
-<div><small>Passengers completed</small><strong id="completed">0</strong></div>
-<div><small>Mean queue wait</small><strong id="meanWait">—</strong></div>
-<div><small>Mean queue length</small><strong id="meanQueue">—</strong></div>
-<div><small>Station utilisation</small><strong id="util">—</strong></div>
-</section>
-<details><summary>About · How to use · Verification</summary><p>Choose the arrival rate, service-duration multiplier, number of identical stations, and empirical/exponential service model. Press <strong>Start</strong> to run a single FIFO queue with exponential interarrival times. Empirical mode samples observed baggage-check durations (n=162) with replacement. In baseline mode services are exponential with a 1-minute mean before scaling. Pause or reset at any time. The simulation admits arrivals for 60 minutes, then drains the queue before reporting final statistics. Repeated runs are needed for confidence intervals; this single animation is not a statistical conclusion.</p><p><strong>Reference trace:</strong> the deterministic test has arrivals at 0, 1 and 1.5 minutes, service times 3, 2 and 1 minute, and one station. Expected waits are 0, 2 and 3.5 minutes, with mean 1.8333 minutes. This test is shared with the Python unit tests.</p><p><strong>Limitations:</strong> arrival rates and pooled multi-station configuration are assumed rather than directly observed. The real data describe only selected manual baggage checks and may not represent all secondary checks. The animation is one run; notebook confidence intervals, not this animation, support scenario decisions. This is a queueing demonstration, not an operational safety recommendation.</p></details>
-<p class="source-note"><strong>Source:</strong> Rotterdam The Hague Airport Security Checkpoint Data (4TU.ResearchData; CC BY 4.0). Only screening durations are used; see <a href="https://research.tudelft.nl/en/datasets/airport-security-checkpoint-data/">dataset record</a> for provenance.</p>
-<footer>All calculations run locally in your browser. No passenger data is transmitted.</footer>
-</main><script src="observed_durations.js"></script><script src="script.js"></script>
-</body></html>
+  <div class="app-shell">
+    <header class="topbar">
+      <a class="identity" href="#top" aria-label="Airport Queue Explorer, top of page">
+        <span class="identity-mark" aria-hidden="true">
+          <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3v26M3 16h26M8 8l16 16M24 8L8 24" opacity=".27"/><path d="m7.5 18 17-10-7.2 17.4-2.8-6.9L7.5 18Z" fill="currentColor" stroke="none"/><path d="m14.5 18.5 10-10" stroke="#0b253a" stroke-width="1.1"/></svg>
+        </span>
+        <span><strong>FLOW / LAB</strong><small>Airport Queue Explorer</small></span>
+      </a>
+      <nav class="topnav" aria-label="Page sections">
+        <a class="nav-active" href="#simulation">Simulator</a>
+        <a href="#insights">Results</a>
+        <a href="#method">Methodology</a>
+      </nav>
+      <div class="topbar-tag"><span class="status-dot" aria-hidden="true"></span> Browser-based · Offline capable</div>
+    </header>
+
+    <main id="top">
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="hero-content">
+          <div class="hero-kicker"><span class="hero-spark" aria-hidden="true">✦</span> OPERATIONS RESEARCH / INTERACTIVE LAB</div>
+          <h1 id="hero-title">See the queue.<br><em>Understand the flow.</em></h1>
+          <p>Explore how inspection capacity shapes passenger waiting times. Real observed baggage-check durations meet transparent, hypothetical arrival scenarios.</p>
+        </div>
+        <div class="hero-facts" aria-label="Model facts">
+          <div class="hero-fact"><strong>162</strong><span>Observed<br>service durations</span></div>
+          <div class="hero-fact"><strong>13</strong><span>Documented<br>data sessions</span></div>
+          <div class="hero-fact"><strong>60<span class="fact-unit">min</span></strong><span>Arrival<br>window</span></div>
+          <div class="hero-notice"><span class="hero-notice-icon" aria-hidden="true">i</span> <span>Arrival rates are scenario assumptions, <strong>not measured airport demand.</strong></span></div>
+        </div>
+      </section>
+
+      <div class="workspace" id="simulation">
+        <aside class="panel control-panel" aria-labelledby="controls-title">
+          <div class="panel-heading">
+            <div class="title-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h16M4 17h16M9 4v6M15 14v6"/></svg>
+            </div>
+            <div><p class="overline">CONFIGURE</p><h2 id="controls-title">Scenario controls</h2></div>
+          </div>
+          <p class="panel-description">Change assumptions, then start a single simulation run.</p>
+
+          <form class="controls" onsubmit="return false" aria-label="Simulation parameters">
+            <div class="field">
+              <div class="field-heading"><label for="arrival">Arrival rate</label><span class="field-unit">passengers / min</span></div>
+              <input id="arrival" type="number" min="0.05" max="10" step="0.05" value="0.8" inputmode="decimal">
+              <small>Assumed Poisson arrivals</small>
+            </div>
+            <div class="field">
+              <div class="field-heading"><label for="servers">Inspection stations</label><span class="field-unit">parallel servers</span></div>
+              <input id="servers" type="number" min="1" max="12" step="1" value="2" inputmode="numeric">
+              <small>One shared FIFO waiting line</small>
+            </div>
+            <div class="field">
+              <div class="field-heading"><label for="distribution">Service-time model</label></div>
+              <select id="distribution">
+                <option value="empirical">Observed durations (M/G/c)</option>
+                <option value="exponential">Exponential baseline (M/M/c)</option>
+              </select>
+              <small>Real sample or analytical-family baseline</small>
+            </div>
+            <div class="field">
+              <div class="field-heading"><label for="service">Service-time multiplier</label><span class="field-unit">1.0 = baseline</span></div>
+              <input id="service" type="number" min="0.05" max="10" step="0.05" value="1" inputmode="decimal">
+              <small>Scale inspection times for what-if tests</small>
+            </div>
+            <div class="field speed-field">
+              <div class="field-heading"><label for="speed">Playback speed</label><output id="speedValue" for="speed">8×</output></div>
+              <input id="speed" type="range" min="1" max="30" step="1" value="8">
+              <div class="range-ends"><span>1×</span><span>30×</span></div>
+            </div>
+          </form>
+          <div class="controls-actions">
+            <button type="button" id="start" class="btn btn-primary"><span class="btn-symbol" aria-hidden="true">▶</span> Start simulation</button>
+            <div class="button-pair">
+              <button type="button" id="pause" class="btn btn-subtle" disabled>Pause</button>
+              <button type="button" id="reset" class="btn btn-subtle">Reset</button>
+            </div>
+            <button type="button" id="reference" class="btn btn-reference"><span aria-hidden="true">◇</span> Run reference trace <span class="tiny-arrow" aria-hidden="true">↗</span></button>
+          </div>
+          <p class="field-footnote"><span class="footnote-star" aria-hidden="true">✦</span> Runs use a fixed seed for repeatable scenarios. Statistics describe one run; the notebook supplies replication confidence intervals.</p>
+        </aside>
+
+        <section class="panel simulation-panel" aria-labelledby="stage-title">
+          <div class="simulation-head">
+            <div><p class="overline">LIVE SIMULATION</p><h2 id="stage-title">Inspection flow</h2></div>
+            <span class="run-badge" id="runState"><span class="run-dot" aria-hidden="true"></span><span id="runStateText">Ready to simulate</span></span>
+          </div>
+          <p id="error" role="alert" class="error" hidden></p>
+          <div class="timeline">
+            <div class="timeline-top">
+              <div><span class="mini-label">SIMULATION CLOCK</span><strong id="clock">00:00</strong></div>
+              <div class="timeline-right"><span id="progress">0 of 60 simulated minutes</span><span id="timePercent">0%</span></div>
+            </div>
+            <div class="progress-track" role="progressbar" id="timelineProgress" aria-label="Arrival-window progression" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div id="progressFill"></div></div>
+          </div>
+          <div class="model-strip"><span class="model-pill"><span class="model-pill-dot" aria-hidden="true"></span><span id="mode">Observed service-time samples</span></span><span class="strip-right">SINGLE FIFO QUEUE <span aria-hidden="true">·</span> PARALLEL STATIONS</span></div>
+
+          <div class="flow-stage">
+            <div class="flow-track">
+              <div class="zone-top"><div><span class="zone-kicker">01 / ARRIVAL STREAM</span><h3>Waiting queue</h3></div><span class="queue-count" id="queueCount">0 waiting</span></div>
+              <div class="queue-surface"><div class="queue-rail" aria-hidden="true"></div><div id="waiting" class="waiting" aria-live="off"><span class="muted">Press Start to begin arrivals</span></div></div>
+              <p class="zone-caption">First in, first out · Unbounded waiting capacity</p>
+            </div>
+            <div class="flow-arrow" aria-hidden="true"><span>FIFO</span><svg viewBox="0 0 60 24" fill="none"><path d="M0 12h54m-9-9 9 9-9 9" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <div class="flow-track servers-track">
+              <div class="zone-top"><div><span class="zone-kicker">02 / SERVICE</span><h3>Inspection stations</h3></div><span class="station-count" id="stationCount">2 stations</span></div>
+              <div id="stations" class="stations" aria-label="Current inspection-station status"></div>
+              <p class="zone-caption">Real durations or exponential samples</p>
+            </div>
+          </div>
+
+          <div class="queue-history" aria-labelledby="history-title">
+            <div class="history-head"><div><span class="mini-label">LIVE VISUALIZATION</span><h3 id="history-title">Queue occupancy over time</h3></div><span class="chart-live"><span class="chart-live-dot" aria-hidden="true"></span> QUEUE LENGTH</span></div>
+            <div class="chart-wrap">
+              <div class="y-axis" aria-hidden="true"><span id="chartMax">5</span><span id="chartMid">2</span><span>0</span></div>
+              <svg id="queueChart" viewBox="0 0 640 114" preserveAspectRatio="none" role="img" aria-label="Line chart of the waiting-queue count over simulated time; visualization only">
+                <defs><linearGradient id="queueFill" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#42b8ae" stop-opacity=".27"/><stop offset="100%" stop-color="#42b8ae" stop-opacity="0"/></linearGradient></defs>
+                <g class="gridlines" stroke="#dce8ed" stroke-dasharray="4 6"><path d="M0 10H640 M0 57H640 M0 104H640"/></g>
+                <path id="queueArea" d="M0 104 L640 104 L640 104 Z" fill="url(#queueFill)"></path>
+                <polyline id="queuePolyline" points="0,104 640,104" fill="none" stroke="#0e9b91" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"></polyline>
+                <circle id="queueCursor" cx="0" cy="104" r="4.4" fill="#0e9b91" stroke="white" stroke-width="2"></circle>
+              </svg>
+            </div>
+            <div class="chart-footer"><span>SIMULATION START</span><span>END OF ARRIVAL WINDOW / 60 MIN</span></div>
+          </div>
+        </section>
+      </div>
+
+      <section class="insights-section" id="insights" aria-labelledby="metrics-title">
+        <div class="section-title"><div><p class="overline">PERFORMANCE MONITOR</p><h2 id="metrics-title">Live statistics</h2></div><span>Updated during the simulated run</span></div>
+        <div class="metrics" aria-label="Live simulation statistics">
+          <div class="metric"><div class="metric-icon arrivals-icon" aria-hidden="true">↘</div><small>Passengers arrived</small><strong id="arrived">0</strong><span>Total entered the queue</span></div>
+          <div class="metric"><div class="metric-icon served-icon" aria-hidden="true">✓</div><small>Passengers completed</small><strong id="completed">0</strong><span>Finished inspection</span></div>
+          <div class="metric"><div class="metric-icon wait-icon" aria-hidden="true">◷</div><small>Mean queue wait</small><strong id="meanWait">—</strong><span>For passengers who started service</span></div>
+          <div class="metric"><div class="metric-icon queue-icon" aria-hidden="true">≋</div><small>Mean queue length</small><strong id="meanQueue">—</strong><span>Time-weighted average</span></div>
+          <div class="metric"><div class="metric-icon util-icon" aria-hidden="true">◉</div><small>Station utilisation</small><strong id="util">—</strong><span>Observed-time busy fraction</span></div>
+        </div>
+      </section>
+
+      <section id="method" class="bottom-grid" aria-label="Methodology and limitations">
+        <div class="info-panel"><div class="info-icon" aria-hidden="true">⌁</div><p class="overline">THE MODEL</p><h2>Built on discrete-event simulation.</h2><p>One shared first-in, first-out queue feeding multiple inspection stations. Poisson arrivals are assumed. Empirical service-time mode samples <strong>162 measured baggage-check durations</strong>; exponential mode provides an M/M/c baseline.</p><div class="info-tags"><span>M/M/c baseline</span><span>M/G/c empirical</span><span>Monte Carlo</span></div></div>
+        <div class="info-panel"><div class="info-icon" aria-hidden="true">✓</div><p class="overline">VERIFICATION & RESPONSIBLE USE</p><h2>Explore scenarios, not predictions.</h2><p><strong>Run reference trace</strong> uses arrivals at 0, 1 and 1.5 minutes and service times 3, 2 and 1 minutes on one station; expected waits: 0, 2 and 3.5 minutes (mean <strong>1.8333 min</strong>).</p><p>This animation is one simulation realisation. Notebook replications provide uncertainty estimates. Arrival demand and queue configuration were not directly observed at the airport.</p></div>
+      </section>
+      <details class="guide-panel" id="guide">
+        <summary><span><strong>How to use this simulator</strong><small>Controls, reference test and interpreting the output</small></span><span aria-hidden="true" class="guide-chevron">⌄</span></summary>
+        <ol>
+          <li>Choose an <strong>assumed arrival rate</strong>, number of stations, service-time model and service-time multiplier.</li>
+          <li>Press <strong>Start simulation</strong>. Watch the waiting queue and inspection stations as simulation time advances. Use Pause/Resume or Reset at any point.</li>
+          <li>Observe the five live statistics. The queue chart displays the sampled queue count from this particular run; it is not a confidence interval.</li>
+          <li>Press <strong>Run reference trace</strong> to run a fixed three-passenger check: mean queue wait should be <strong>1.833 minutes</strong>.</li>
+          <li>Use the linked Python notebook for replicated experiments, uncertainty intervals and staffing comparisons; the browser animation alone does not validate a real airport.</li>
+        </ol>
+      </details>
+      <div class="source-bar"><div><span>DATA PROVENANCE</span><p>Airport Security Checkpoint Data · TU Delft / 4TU.ResearchData · <strong>CC BY 4.0</strong></p></div><a href="https://doi.org/10.4121/uuid:6246e6a6-d149-420f-a6a4-7afd08f154b5" target="_blank" rel="noopener noreferrer">Dataset information <span aria-hidden="true">↗</span></a></div>
+      <footer><span>FLOW / LAB <span class="footer-divider">/</span> AIRPORT QUEUE EXPLORER</span><span>All calculations run locally in your browser. No passenger data are transmitted.</span></footer>
+    </main>
+  </div>
+  <script src="observed_durations.js"></script>
+  <script src="script.js"></script>
+  <script src="ui.js"></script>
+</body>
+</html>
